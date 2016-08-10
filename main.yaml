@@ -1,0 +1,81 @@
+---
+
+- name: launch a compute instance
+  hosts: localhost
+  vars_files:
+    - vars.yaml
+  tasks:
+  - name: test for presence of local keypair
+    stat: path="id_rsa_ambari"
+    register: testenv_keypair_local
+  
+  - name: delete remote keypair
+    os_keypair:
+      name: "ambarikey"
+      state: absent
+    when: not testenv_keypair_local.stat.exists
+  
+  - name: create the keypair
+    os_keypair:
+      name: "ambarikey"
+      state: present
+    register: testenv_keypair
+  
+  - name: persist the keypair
+    copy:
+      dest: "./id_rsa_ambari"
+      content: "{{ testenv_keypair.key.private_key }}"
+      mode: 0600
+    when: testenv_keypair.changed
+
+  - name: launch an instance
+    os_server:
+      name: "{{ item }}"
+      state: present
+      auth:
+        auth_url: "{{ lookup('env', 'OS_AUTH_URL') }}"
+        username: "{{ lookup('env', 'OS_USERNAME') }}"
+        password: "{{ lookup('env', 'OS_PASSWORD') }}"
+        project_name: "{{ lookup('env', 'OS_TENANT_NAME') }}"
+      image: "{{image}}"
+      security_groups: "{{secgroups}}"
+      flavor: "{{flavor}}"
+      #key_name: "{{key_name}}"
+      key_name: "ambarikey"
+      nics:
+        - net-name: "{{net_name}}"
+      wait: yes
+    register: osinstance
+    with_items:
+      - "ambari1"
+      - "ansvm2"
+
+  - name: Wait 15 seconds
+    pause: seconds=15
+    when: osinstance.changed
+  
+  - name: Add new VM to ansible inventory
+    add_host:
+      name: "{{ item.server.name}}"
+      ansible_host: "{{item.server.public_v4}}"
+      ansible_user: "{{ansible_user}}"
+      ansible_ssh_common_args: -i ./id_rsa_ambari -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no
+    with_items: "{{ osinstance.results }}"
+
+- name: Upgrade all packages
+  become: true
+  hosts:
+    - "ambari1"
+  tasks:
+  - name: Add Ambari Repo Key
+    apt_key: keyserver=keyserver.ubuntu.com id=B9733A7A07513CAD
+  - name: Add Ambari Repo
+    apt_repository: repo='deb http://public-repo-1.hortonworks.com/ambari/ubuntu14/2.x/updates/2.2.2.0 Ambari     main' state=present filename='ambari'
+  - name: upgrade all packages
+    apt: upgrade=dist update_cache=yes
+  - name: install ambari server
+    apt: name=ambari-server
+  - name: server setup
+    command: ambari-server setup -s
+  - name: server start
+    command: ambari-server start
