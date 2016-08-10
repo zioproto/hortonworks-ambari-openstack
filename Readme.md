@@ -20,12 +20,14 @@ Run the playbook
 export ANSIBLE_HOST_KEY_CHECKING=False
 ansible-playbook main.yaml
 ```
-Check the IP address of the ambari server
+Check the public IP address of the ambari1 server
 
 ```
 openstack server list
 ```
 
-Point your browser to http://ambari:8080
+Point your browser to http://ambari1:8080
 
+Login as `admin` password `admin`
 
+![Install Options Screen](docs/ambari1.tiff)
