@@ -62,20 +62,40 @@
       ansible_ssh_common_args: -i ./id_rsa_ambari -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no
     with_items: "{{ osinstance.results }}"
 
-- name: Upgrade all packages
+- name: Configure all hosts
+  become: true
+  hosts:
+    - "ambari1"
+    - "ansvm2"
+  tasks:
+  - name: Add Ambari Repo Key
+    apt_key: keyserver=keyserver.ubuntu.com id=B9733A7A07513CAD
+  - name: "Build hosts file"
+    lineinfile: dest=/etc/hosts regexp='.*{{ item }}$' line="{{ hostvars[item].ansible_default_ipv4.address }} {{item}}" state=present
+    when: hostvars[item].ansible_default_ipv4.address is defined
+    with_items:
+      - "ambari1"
+      - "ansvm2"
+
+- name: Install the ambari server
   become: true
   hosts:
     - "ambari1"
   tasks:
-  - name: Add Ambari Repo Key
-    apt_key: keyserver=keyserver.ubuntu.com id=B9733A7A07513CAD
   - name: Add Ambari Repo
     apt_repository: repo='deb http://public-repo-1.hortonworks.com/ambari/ubuntu14/2.x/updates/2.2.2.0 Ambari     main' state=present filename='ambari'
   - name: upgrade all packages
     apt: upgrade=dist update_cache=yes
+  - name: Check if Ambari is already installed
+    stat: path=/var/run/ambari-server/
+    register: ambari_is_installed
   - name: install ambari server
     apt: name=ambari-server
+    when: ambari_is_installed.stat.exists == False
   - name: server setup
     command: ambari-server setup -s
+    when: ambari_is_installed.stat.exists == False
   - name: server start
     command: ambari-server start
+    when: ambari_is_installed.stat.exists == False
+
