@@ -48,7 +48,13 @@
     register: osinstance
     with_items:
       - "ambari1"
-      - "ansvm2"
+      - "ambari2"
+      - "ambari3"
+      - "ambari4"
+      - "ambari5"
+      - "ambari6"
+      - "ambari7"
+      - "ambari8"
 
   - name: Wait 15 seconds
     pause: seconds=15
@@ -66,7 +72,13 @@
   become: true
   hosts:
     - "ambari1"
-    - "ansvm2"
+    - "ambari2"
+    - "ambari3"
+    - "ambari4"
+    - "ambari5"
+    - "ambari6"
+    - "ambari7"
+    - "ambari8"
   tasks:
   - name: Add Ambari Repo Key
     apt_key: keyserver=keyserver.ubuntu.com id=B9733A7A07513CAD
@@ -75,9 +87,15 @@
     when: hostvars[item].ansible_default_ipv4.address is defined
     with_items:
       - "ambari1"
-      - "ansvm2"
+      - "ambari2"
+      - "ambari3"
+      - "ambari4"
+      - "ambari5"
+      - "ambari6"
+      - "ambari7"
+      - "ambari8"
 
-- name: Install the ambari server
+- name: Install the ambari server on ambari1
   become: true
   hosts:
     - "ambari1"
