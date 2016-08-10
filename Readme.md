@@ -30,4 +30,4 @@ Point your browser to http://ambari1:8080
 
 Login as `admin` password `admin`
 
-![Install Options Screen](docs/ambari1.tiff)
+![Install Options Screen](docs/ambari1.png)
