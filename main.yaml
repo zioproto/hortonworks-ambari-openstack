@@ -127,6 +127,8 @@
   - name: Manage fstab
     mount: name=/hadoop src=/dev/vdb opts=nobootwait fstype=ext4 state=mounted
     when: hadoop_folder.stat.exists == False
+  - name: copy cheatsheet file
+    copy: src=docs/cheatsheet.txt dest=/home/ubuntu/cheatsheet.txt owner=ubuntu
 
 - name: Install the ambari server on ambari1
   become: true
