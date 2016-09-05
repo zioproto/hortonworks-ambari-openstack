@@ -8,3 +8,5 @@ flavor: c1.xlarge
 key_name: macsp
 net_name: private
 ansible_user: ubuntu
+s3access: key
+s3secret: key

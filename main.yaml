@@ -129,6 +129,8 @@
     when: hadoop_folder.stat.exists == False
   - name: copy cheatsheet file
     copy: src=docs/cheatsheet.txt dest=/home/ubuntu/cheatsheet.txt owner=ubuntu
+  - name: copy s3 config
+    template: src=templates/s3.xml.j2 dest=/home/ubuntu/s3.xml owner=ubuntu
 
 - name: Install the ambari server on ambari1
   become: true
