@@ -90,6 +90,8 @@
     with_items: "{{ osinstance.results }}"
 
 - name: Configure all hosts
+  vars_files:
+    - vars.yaml
   become: true
   hosts:
     - "ambari1"
