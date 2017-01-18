@@ -140,7 +140,7 @@
     - "ambari1"
   tasks:
   - name: Add Ambari Repo
-    apt_repository: repo='deb http://public-repo-1.hortonworks.com/ambari/ubuntu14/2.x/updates/2.2.2.0 Ambari     main' state=present filename='ambari'
+    apt_repository: repo='deb http://public-repo-1.hortonworks.com/ambari/ubuntu14/2.x/updates/2.4.2.0 Ambari     main' state=present filename='ambari'
   - name: upgrade all packages
     apt: upgrade=dist update_cache=yes
   - name: Check if Ambari is already installed
